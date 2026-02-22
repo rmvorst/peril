@@ -29,8 +29,8 @@ func main() {
 	ch, err := conn.Channel()
 	logErr(err)
 
-	queueName := routing.GameLogSlug + ".*"
-	pubsub.DeclareAndBind(conn, routing.ExchangePerilTopic, routing.GameLogSlug, queueName, 0)
+	err = routing.Server_ConfigureRabbitMQ(conn, ch)
+	logErr(err)
 
 	gamelogic.PrintServerHelp()
 	for {
