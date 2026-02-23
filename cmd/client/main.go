@@ -50,7 +50,13 @@ func main() {
 	// Subscribe to move game status
 	moveQueueName := routing.ArmyMovesPrefix + "." + username
 	moveKey := routing.ArmyMovesPrefix + ".*"
-	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, moveQueueName, moveKey, 1, handlerMove(gamestate))
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, moveQueueName, moveKey, 1, handlerMove(gamestate, ch))
+	logErr(err)
+
+	// Subscribe to war game status
+	warQueueName := "war"
+	warKey := "war.*"
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, warQueueName, warKey, 0, handlerWar(gamestate))
 	logErr(err)
 
 	for {
