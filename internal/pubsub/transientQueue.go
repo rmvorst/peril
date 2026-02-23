@@ -28,7 +28,7 @@ func DeclareAndBind(conn *amqp.Connection, exchange, queueName, key string, queu
 	}
 
 	args := amqp.Table{
-		key: routing.ExchangePerilFanout,
+		"x-dead-letter-exchange": routing.ExchangePerilFanout,
 	}
 	queue, err := ch.QueueDeclare(queueName, durable, autoDelete, exclusive, false, args)
 	if err != nil {
