@@ -20,6 +20,29 @@ func logErr(err error) {
 	}
 }
 
+func Server_ConfigureRabbitMQ(conn *amqp.Connection, ch *amqp.Channel) error {
+	// Declare relevant exchagnes for Peril on RabbitMQ
+	err := ch.ExchangeDeclare(routing.ExchangePerilDirect, "direct", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	err = ch.ExchangeDeclare(routing.ExchangePerilTopic, "topic", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	err = ch.ExchangeDeclare(routing.ExchangePerilFanout, "fanout", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	queueName := routing.GameLogSlug + ".*"
+	pubsub.DeclareAndBind(conn, routing.ExchangePerilTopic, routing.GameLogSlug, queueName, 0)
+
+	return nil
+}
+
 func main() {
 	conn, err := amqp.Dial(connString)
 	logErr(err)
@@ -29,7 +52,7 @@ func main() {
 	ch, err := conn.Channel()
 	logErr(err)
 
-	err = routing.Server_ConfigureRabbitMQ(conn, ch)
+	err = Server_ConfigureRabbitMQ(conn, ch)
 	logErr(err)
 
 	gamelogic.PrintServerHelp()
