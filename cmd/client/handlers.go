@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -31,19 +30,15 @@ func handlerMove(gamestate *gamelogic.GameState, ch *amqp.Channel) func(gamelogi
 				Attacker: move.Player,
 				Defender: gamestate.GetPlayerSnap(),
 			}
-			payloadBytes, err := json.Marshal(payload)
-			if err != nil {
-				return pubsub.NackDiscard
-			}
 
-			err = pubsub.PublishJSON(ch, routing.ExchangePerilTopic, routingKey, payloadBytes)
+			err := pubsub.PublishJSON(ch, routing.ExchangePerilTopic, routingKey, payload)
 			if err != nil {
-				return pubsub.NackDiscard
+				return pubsub.NackRequeue
 			}
-			return pubsub.NackRequeue
+			return pubsub.Ack
 
 		case gamelogic.MoveOutComeSafe:
-			return pubsub.NackDiscard
+			return pubsub.Ack
 
 		default:
 			return pubsub.Ack
